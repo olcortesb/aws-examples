@@ -39,6 +39,24 @@ Resources:
         - SQSPollerPolicy:
             QueueName: !GetAtt MessagesQueue.QueueName
 
+  ProcessMessagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: process_messages/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref MessagesQueue
+          THRESHOLD: 50
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt MessagesQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt MessagesQueue.QueueName
+
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -56,6 +74,9 @@ Outputs:
   GetMessagesFunction:
     Description: Get Messages Lambda Function ARN
     Value: !GetAtt GetMessagesFunction.Arn
+  ProcessMessagesFunction:
+    Description: Process Messages Lambda Function ARN
+    Value: !GetAtt ProcessMessagesFunction.Arn
   MessagesQueueUrl:
     Description: URL of the SQS Queue
     Value: !Ref MessagesQueue

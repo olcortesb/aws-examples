@@ -43,11 +43,13 @@ sam deploy --guided --profile your-aws-profile
 
 The deployment will create:
 - SQS Queue: `bach-messages-messages-queue`
-- Lambda Function: `bach-messages-GetMessagesFunction-XXXXX`
+- Lambda Function: `bach-messages-GetMessagesFunction-XXXXX` (processes and deletes messages)
+- Lambda Function: `bach-messages-ProcessMessagesFunction-XXXXX` (returns messages < 50 to queue)
 
 After deployment, note the outputs:
 - `MessagesQueueUrl`: URL of the SQS queue
-- `GetMessagesFunction`: ARN of the Lambda function
+- `GetMessagesFunction`: ARN of the get messages Lambda function
+- `ProcessMessagesFunction`: ARN of the process messages Lambda function
 
 ## 2. Send Messages to SQS
 
@@ -70,24 +72,32 @@ Enter AWS region (default: us-east-1): us-east-1
 Enter SQS Queue URL: https://sqs.us-east-1.amazonaws.com/123456789012/bach-messages-messages-queue
 ```
 
-## 3. Invoke Lambda Function
+## 3. Invoke Lambda Functions
 
-Invoke the Lambda function manually to process messages:
+### GetMessagesFunction
+Processes and deletes all messages:
 
 ```bash
 aws lambda invoke --function-name bach-messages-GetMessagesFunction-XXXXX --profile your-aws-profile response.json
 ```
 
-Or using the full ARN:
+The function will:
+- Retrieve up to 10 messages from the SQS queue
+- Process and delete all messages
+- Return the processed message details in `response.json`
+
+### ProcessMessagesFunction
+Processes messages but returns numbers < 50 back to the queue:
 
 ```bash
-aws lambda invoke --function-name arn:aws:lambda:us-east-1:123456789012:function:bach-messages-GetMessagesFunction-XXXXX --profile your-aws-profile response.json
+aws lambda invoke --function-name bach-messages-ProcessMessagesFunction-XXXXX --profile your-aws-profile response.json
 ```
 
 The function will:
 - Retrieve up to 10 messages from the SQS queue
-- Process and delete the messages
-- Return the processed message details in `response.json`
+- Process messages with numbers >= 50 (delete them)
+- Return messages with numbers < 50 back to the queue
+- Show counts of processed vs returned messages in `response.json`
 
 ## Local Testing
 
