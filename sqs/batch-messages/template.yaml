@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  bach-messages
+
+  Sample SAM Template for bach-messages
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+    Tracing: Active
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+Resources:
+  MessagesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-messages-queue"
+      VisibilityTimeoutSeconds: 30
+      MessageRetentionPeriod: 1209600
+
+  GetMessagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_messages/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref MessagesQueue
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt MessagesQueue.QueueName
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  GetMessagesFunction:
+    Description: Get Messages Lambda Function ARN
+    Value: !GetAtt GetMessagesFunction.Arn
+  MessagesQueueUrl:
+    Description: URL of the SQS Queue
+    Value: !Ref MessagesQueue
+  MessagesQueueArn:
+    Description: ARN of the SQS Queue
+    Value: !GetAtt MessagesQueue.Arn
