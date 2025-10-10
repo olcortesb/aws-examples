@@ -43,13 +43,19 @@ sam deploy --guided --profile your-aws-profile
 
 The deployment will create:
 - SQS Queue: `bach-messages-messages-queue`
+- SQS Dead Letter Queue: `bach-messages-dead-letter-queue`
 - Lambda Function: `bach-messages-GetMessagesFunction-XXXXX` (processes and deletes messages)
 - Lambda Function: `bach-messages-ProcessMessagesFunction-XXXXX` (returns messages < 50 to queue)
+- Lambda Function: `bach-messages-ProcessWithVisibilityFunction-XXXXX` (uses visibility timeout for messages < 50)
+- Lambda Function: `bach-messages-ProcessWithDlqFunction-XXXXX` (sends messages < 50 to DLQ)
 
 After deployment, note the outputs:
 - `MessagesQueueUrl`: URL of the SQS queue
+- `DeadLetterQueueUrl`: URL of the dead letter queue
 - `GetMessagesFunction`: ARN of the get messages Lambda function
 - `ProcessMessagesFunction`: ARN of the process messages Lambda function
+- `ProcessWithVisibilityFunction`: ARN of the process with visibility timeout Lambda function
+- `ProcessWithDlqFunction`: ARN of the process with DLQ Lambda function
 
 ## 2. Send Messages to SQS
 
@@ -98,6 +104,33 @@ The function will:
 - Process messages with numbers >= 50 (delete them)
 - Return messages with numbers < 50 back to the queue
 - Show counts of processed vs returned messages in `response.json`
+
+### ProcessWithVisibilityFunction
+Processes messages using visibility timeout (messages < 50 reappear automatically):
+
+```bash
+aws lambda invoke --function-name bach-messages-ProcessWithVisibilityFunction-XXXXX --profile your-aws-profile response.json
+```
+
+The function will:
+- Retrieve up to 10 messages from the SQS queue
+- Process and delete messages with numbers >= 50
+- Skip messages with numbers < 50 (they will reappear when visibility timeout expires)
+- Show counts of processed vs skipped messages in `response.json`
+
+### ProcessWithDlqFunction
+Processes messages using Dead Letter Queue pattern:
+
+```bash
+aws lambda invoke --function-name bach-messages-ProcessWithDlqFunction-XXXXX --profile your-aws-profile response.json
+```
+
+The function will:
+- Retrieve up to 10 messages from the SQS queue
+- Process and delete messages with numbers >= 50 from original queue
+- Send messages with numbers < 50 to the Dead Letter Queue
+- Delete all processed messages from the original queue
+- Show counts of processed vs DLQ messages in `response.json`
 
 ## Local Testing
 

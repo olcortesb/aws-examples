@@ -1,1 +1,7 @@
 sqs/batch-messages/.aws-sam
+
+# WAF Cost Analyzer outputs
+waf-cost-analyzer/waf_analysis.json
+waf-cost-analyzer/*.json
+waf-cost-analyzer/__pycache__/
+waf-cost-analyzer

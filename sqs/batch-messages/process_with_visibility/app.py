@@ -3,7 +3,7 @@ import os
 import boto3
 
 def lambda_handler(event, context):
-    """Process messages and return to queue if number is less than threshold"""
+    """Process messages using visibility timeout - only delete messages that meet criteria"""
     queue_url = os.environ.get('QUEUE_URL')
     threshold = int(os.environ.get('THRESHOLD', '50'))
     
@@ -21,44 +21,40 @@ def lambda_handler(event, context):
         
         messages = response.get('Messages', [])
         processed_messages = []
-        returned_messages = []
+        skipped_messages = []
         
         for msg in messages:
             message_body = msg['Body']
             message_number = int(message_body)
             
-            if message_number < threshold:
-                # Return message to queue
-                sqs.send_message(
-                    QueueUrl=queue_url,
-                    MessageBody=message_body
-                )
-                returned_messages.append({
-                    "messageId": msg['MessageId'],
-                    "body": message_body,
-                    "action": "returned_to_queue"
-                })
-            else:
+            if message_number >= threshold:
+                # Process and delete message
                 processed_messages.append({
                     "messageId": msg['MessageId'],
                     "body": message_body,
-                    "action": "processed"
+                    "action": "processed_and_deleted"
                 })
-                # Delete original message
+                
                 sqs.delete_message(
                     QueueUrl=queue_url,
                     ReceiptHandle=msg['ReceiptHandle']
                 )
+            else:
+                # Skip message - let visibility timeout expire so it reappears
+                skipped_messages.append({
+                    "messageId": msg['MessageId'],
+                    "body": message_body,
+                    "action": "skipped_will_reappear"
+                })
         
-
         return {
             "queueUrl": queue_url,
             "threshold": threshold,
             "totalMessages": len(messages),
             "processedCount": len(processed_messages),
-            "returnedCount": len(returned_messages),
+            "skippedCount": len(skipped_messages),
             "processedMessages": processed_messages,
-            "returnedMessages": returned_messages
+            "skippedMessages": skipped_messages
         }
         
     except Exception as e:

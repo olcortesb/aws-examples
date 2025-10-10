@@ -18,4 +18,22 @@ manifest_hash = "6686853da3491a56c98917cc5c4ddea2"
 packagetype = "Zip"
 functions = ["ProcessMessagesFunction"]
 
+[function_build_definitions.fdde2d5d-77e4-4612-ad56-b6471198de80]
+codeuri = "/home/ackstorm/workspace/aws-examples/sqs/batch-messages/process_with_visibility"
+runtime = "python3.13"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = "6d9d5cc985cd9a6492f8c326547e95de"
+packagetype = "Zip"
+functions = ["ProcessWithVisibilityFunction"]
+
+[function_build_definitions.79de9106-9904-44d7-9803-6b8960ba63a0]
+codeuri = "/home/ackstorm/workspace/aws-examples/sqs/batch-messages/process_with_dlq"
+runtime = "python3.13"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = "6d9d5cc985cd9a6492f8c326547e95de"
+packagetype = "Zip"
+functions = ["ProcessWithDlqFunction"]
+
 [layer_build_definitions]

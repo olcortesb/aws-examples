@@ -24,6 +24,12 @@ Resources:
       VisibilityTimeoutSeconds: 30
       MessageRetentionPeriod: 1209600
 
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-dead-letter-queue"
+      MessageRetentionPeriod: 1209600
+
   GetMessagesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -57,6 +63,41 @@ Resources:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt MessagesQueue.QueueName
 
+  ProcessWithVisibilityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: process_with_visibility/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref MessagesQueue
+          THRESHOLD: 50
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt MessagesQueue.QueueName
+
+  ProcessWithDlqFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: process_with_dlq/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref MessagesQueue
+          DLQ_URL: !Ref DeadLetterQueue
+          THRESHOLD: 50
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt MessagesQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt DeadLetterQueue.QueueName
+
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -77,6 +118,18 @@ Outputs:
   ProcessMessagesFunction:
     Description: Process Messages Lambda Function ARN
     Value: !GetAtt ProcessMessagesFunction.Arn
+  ProcessWithVisibilityFunction:
+    Description: Process Messages with Visibility Timeout Lambda Function ARN
+    Value: !GetAtt ProcessWithVisibilityFunction.Arn
+  ProcessWithDlqFunction:
+    Description: Process Messages with Dead Letter Queue Lambda Function ARN
+    Value: !GetAtt ProcessWithDlqFunction.Arn
+  DeadLetterQueueUrl:
+    Description: URL of the Dead Letter Queue
+    Value: !Ref DeadLetterQueue
+  DeadLetterQueueArn:
+    Description: ARN of the Dead Letter Queue
+    Value: !GetAtt DeadLetterQueue.Arn
   MessagesQueueUrl:
     Description: URL of the SQS Queue
     Value: !Ref MessagesQueue
