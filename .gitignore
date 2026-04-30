@@ -158,4 +158,4 @@ the-new-lambda/scripts/compare_step0_vs_step1.py
 the-new-lambda/scripts/debug_step0.py
 the-new-lambda/scripts/cloudwatch_report.py
 the-new-lambda/scripts/benchmark.sh
-lambda
+/lambda/
