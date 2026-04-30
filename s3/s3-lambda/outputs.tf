@@ -37,3 +37,8 @@ output "vpc_id" {
   description = "VPC ID"
   value       = aws_vpc.main.id
 }
+
+output "dashboard_url" {
+  description = "CloudWatch Dashboard URL"
+  value       = "https://${var.region}.console.aws.amazon.com/cloudwatch/home?region=${var.region}#dashboards:name=${aws_cloudwatch_dashboard.benchmark.dashboard_name}"
+}

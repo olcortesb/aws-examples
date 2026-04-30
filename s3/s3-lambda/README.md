@@ -6,8 +6,8 @@ POC to test the integration and performance of [Amazon S3 Files](https://docs.aw
 
 ## Architecture
 
-![alt text](image.png)
 
+![alt text](image.png)
 
 
 ## Available Operations
@@ -207,7 +207,29 @@ S3 Files is built on Amazon EFS internally. The IAM trust policy for the S3 File
 
 ## Cleanup
 
+Since the S3 bucket has versioning enabled, you must empty all object versions before destroying the infrastructure:
+
 ```bash
+# 1. Empty the bucket (all versions and delete markers)
+BUCKET="s3-lambda-files-$(aws sts get-caller-identity --query Account --output text)"
+
+aws s3api list-object-versions --bucket $BUCKET --region us-east-1 --no-cli-pager --output json | \
+python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+objects = []
+for v in data.get('Versions', []):
+    objects.append({'Key': v['Key'], 'VersionId': v['VersionId']})
+for d in data.get('DeleteMarkers', []):
+    objects.append({'Key': d['Key'], 'VersionId': d['VersionId']})
+if objects:
+    print(json.dumps({'Objects': objects, 'Quiet': True}))
+else:
+    print(json.dumps({'Objects': [], 'Quiet': True}))
+" > /tmp/delete.json && \
+aws s3api delete-objects --bucket $BUCKET --delete file:///tmp/delete.json --region us-east-1 --no-cli-pager
+
+# 2. Destroy all resources
 terraform destroy
 ```
 

@@ -149,7 +149,13 @@ build/
 # Project specific
 # ===========================
 appsync-dynamodb-cognito/
-lambda/
 s3/s3-lambda/benchmark.py
 s3/s3-lambda/*.zip
 waf-cost-analyzer
+the-new-lambda/scripts/check_logs.py
+the-new-lambda/scripts/compare_runtimes.py
+the-new-lambda/scripts/compare_step0_vs_step1.py
+the-new-lambda/scripts/debug_step0.py
+the-new-lambda/scripts/cloudwatch_report.py
+the-new-lambda/scripts/benchmark.sh
+lambda

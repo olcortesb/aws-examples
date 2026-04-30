@@ -76,7 +76,8 @@ resource "aws_security_group" "lambda" {
 # S3 Bucket
 # ===========================
 resource "aws_s3_bucket" "files" {
-  bucket = "${local.name}-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${local.name}-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
 
   tags = { Name = "${local.name}-bucket" }
 }
