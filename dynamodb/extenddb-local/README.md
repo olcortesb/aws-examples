@@ -170,9 +170,9 @@ docker compose up --build
 
 ## Example Stats (500 writes)
 
-### The ExtendDB portal (login):
+### The ExtendDB portal (login — https://localhost:8000):
 
-![](image-1.png)
+![](images/image-1.png)
 
 ### Docker resource consumption
 
@@ -193,7 +193,7 @@ CONTAINER ID   NAME                        CPU %     MEM USAGE / LIMIT     MEM %
 
 ## Pending: Performance Benchmarks
 
-Scripts planned to measure ExtendDB performance characteristics:
+With this structure I want to create scripts to measure ExtendDB performance characteristics:
 
 | Script | Description |
 |--------|-------------|
