@@ -4,7 +4,7 @@ Run a full DynamoDB-compatible environment locally using [ExtendDB](https://gith
 
 ## Architecture
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 <!-- ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -185,11 +185,11 @@ CONTAINER ID   NAME                        CPU %     MEM USAGE / LIMIT     MEM %
 ```
 ### The ExtendDB portal(metrics):
 
-![](image-2.png)
+![](images/image-2.png)
 
-![](image-3.png)
+![](images/image-3.png)
 
-![](image-4.png)
+![](images/image-4.png)
 
 ## Pending: Performance Benchmarks
 
