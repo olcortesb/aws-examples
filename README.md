@@ -6,6 +6,8 @@ A repository of practical AWS services examples and use cases. Hands-on learning
 
 ```
 aws-examples/
+├── dynamodb/
+│   └── extenddb-local/         # DynamoDB-compatible local env with ExtendDB (Docker)
 ├── sqs/
 │   └── batch-messages/         # SQS batch processing with Lambda (SAM)
 ├── s3/
@@ -14,6 +16,15 @@ aws-examples/
 ```
 
 ## Examples
+
+### DynamoDB - ExtendDB Local
+Full DynamoDB-compatible local environment using [ExtendDB](https://github.com/ExtendDB/extenddb) (open source). Three Docker containers: PostgreSQL, ExtendDB server, and a Python app with selectable test scripts.
+- No AWS account required
+- Full DynamoDB wire protocol compatibility
+- Multiple scripts: smoke test, CRUD, load test, cleanup
+- Run scripts inside Docker (`docker compose exec`) or locally with virtualenv
+- Web management console with metrics at `https://localhost:8000/console/`
+- [Read more](dynamodb/extenddb-local/README.md)
 
 ### SQS - Batch Messages
 Complete serverless application demonstrating SQS message processing in batches using AWS Lambda.

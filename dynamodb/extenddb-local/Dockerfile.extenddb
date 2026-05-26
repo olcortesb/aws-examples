@@ -1,0 +1,34 @@
+# Stage 1: Build ExtendDB from source
+FROM rust:1.88-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y \
+    git \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+RUN git clone --depth 1 https://github.com/ExtendDB/extenddb.git . && \
+    cargo build --release
+
+# Stage 2: Runtime
+FROM debian:bookworm-slim
+
+RUN groupadd -r extenddb && useradd -r -g extenddb -d /home/extenddb extenddb
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    jq \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /build/target/release/extenddb /usr/local/bin/extenddb
+
+# Prepare dirs writable by entrypoint
+RUN mkdir -p /etc/extenddb /shared /home/extenddb/.extenddb/tls && \
+    chown -R extenddb:extenddb /etc/extenddb /shared /home/extenddb
+
+USER extenddb
+
+EXPOSE 8000

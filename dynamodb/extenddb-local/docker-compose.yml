@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: extenddb-local-dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  extenddb:
+    build:
+      context: .
+      dockerfile: Dockerfile.extenddb
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      EXTENDDB_ADMIN_USER: admin
+      EXTENDDB_ADMIN_PASSWORD: admin123secret
+      PG_PASSWORD: extenddb-local-dev
+    volumes:
+      - shared:/shared
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sk https://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  app:
+    build:
+      context: ./app
+    depends_on:
+      extenddb:
+        condition: service_healthy
+    environment:
+      ENDPOINT_URL: https://extenddb:8000
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - shared:/shared
+      - ./app/scripts:/app/scripts:ro
+
+volumes:
+  pgdata:
+  shared:
