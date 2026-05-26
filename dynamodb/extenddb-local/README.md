@@ -1,6 +1,6 @@
 # DynamoDB - ExtendDB Local
 
-Run a full DynamoDB-compatible environment locally using [ExtendDB](https://github.com/ExtendDB/extenddb) — no AWS account required.
+Run a full DynamoDB-compatible environment locally with Docker using [ExtendDB](https://github.com/ExtendDB/extenddb) — no AWS account required.
 
 ## Architecture
 
@@ -71,7 +71,7 @@ eval $(docker compose exec extenddb cat /shared/credentials.env)
 echo $AWS_ACCESS_KEY_ID
 echo $AWS_SECRET_ACCESS_KEY
 
-# Set the ExtenDB endpoind 
+# Set the ExtendDB endpoint
 export ENDPOINT_URL=https://localhost:8000
 
 # Run any script directly
@@ -170,11 +170,11 @@ docker compose up --build
 
 ## Example Stats (500 writes)
 
-### The ExtendDB Portal (login):
+### The ExtendDB portal (login):
 
 ![](image-1.png)
 
-### The dockers consuming
+### Docker resource consumption
 
 ```
 ~/workspace/aws-examples (main *)$ docker stats --no-stream 2>&1
@@ -183,7 +183,7 @@ CONTAINER ID   NAME                        CPU %     MEM USAGE / LIMIT     MEM %
 3c2942ed6759   extenddb-local-extenddb-1   0.00%     14.24MiB / 31.09GiB   0.04%     977kB / 1.11MB   8.24MB / 20.5kB   10
 06ebf1031a3d   extenddb-local-postgres-1   4.15%     74.94MiB / 31.09GiB   0.24%     850kB / 796kB    1.71MB / 98MB     18
 ```
-### The ExtendDB portal(metrics):
+### The ExtendDB portal (metrics):
 
 ![](images/image-2.png)
 
