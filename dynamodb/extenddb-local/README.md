@@ -168,14 +168,28 @@ docker compose up --build
 - **Slow first build** — Rust compilation takes ~6 min. Docker caches the layer for subsequent runs
 - **Scripts not found** — ensure you're in the `dynamodb/extenddb-local/` directory
 
-## Stats
+## Example Stats (500 writes)
+
+### The ExtendDB Portal (login):
+
+![](image-1.png)
+
+### The dockers consuming
 
 ```
-(.venv) ~/workspace/aws-examples/dynamodb/extenddb-local (main *)$ docker stats --no-stream 2>&1
-CONTAINER ID   NAME                        CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
-7dbcf12c5782   extenddb-local-extenddb-1   0.01%     8.926MiB / 31.09GiB   0.03%     18.6MB / 31.3MB   1.1MB / 20.5kB   10
-5f6663bf7d68   extenddb-local-postgres-1   0.00%     68.05MiB / 31.09GiB   0.21%     13.1MB / 16.6MB   479kB / 189MB    16
+~/workspace/aws-examples (main *)$ docker stats --no-stream 2>&1
+CONTAINER ID   NAME                        CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O         PIDS
+2d506bbf6aaa   extenddb-local-app-1        0.01%     4.828MiB / 31.09GiB   0.02%     158kB / 154kB    12.4MB / 463kB    1
+3c2942ed6759   extenddb-local-extenddb-1   0.00%     14.24MiB / 31.09GiB   0.04%     977kB / 1.11MB   8.24MB / 20.5kB   10
+06ebf1031a3d   extenddb-local-postgres-1   4.15%     74.94MiB / 31.09GiB   0.24%     850kB / 796kB    1.71MB / 98MB     18
 ```
+### The ExtendDB portal(metrics):
+
+![](image-2.png)
+
+![](image-3.png)
+
+![](image-4.png)
 
 ## Pending: Performance Benchmarks
 
