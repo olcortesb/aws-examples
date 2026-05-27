@@ -18,6 +18,9 @@ Three containers:
 - **postgres** — PostgreSQL 15 as the storage backend
 - **extenddb** — Built from [source](https://github.com/ExtendDB/extenddb) (multi-stage Rust build), exposes DynamoDB API on port 8000 with TLS
 - **app** — Python container with multiple scripts selectable at runtime
+- **/dynamo-admin** — GUI for DynamoDB Local, dynalite, localstack etc.
+
+
 
 ### Based on the original ExtendDB architecture:
 
