@@ -48,6 +48,21 @@ services:
       - shared:/shared
       - ./app/scripts:/app/scripts:ro
 
+  admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    depends_on:
+      extenddb:
+        condition: service_healthy
+    environment:
+      DYNAMO_ENDPOINT: https://extenddb:8000
+      AWS_REGION: us-east-1
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    volumes:
+      - shared:/shared
+    entrypoint: ["/bin/sh", "-c", "while [ ! -f /shared/credentials.env ]; do sleep 2; done && export $(cat /shared/credentials.env | xargs) && node dist/dynamodb-admin.js"]
+
 volumes:
   pgdata:
   shared:

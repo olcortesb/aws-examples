@@ -111,13 +111,19 @@ aws dynamodb scan \
 
 ## Management Console
 
-Web console at: `https://localhost:8000/console/`
+ExtendDB web console at: `https://localhost:8000/console/`
 
 Login:
 - **Username:** admin
 - **Password:** admin123secret
 
 View metrics, accounts, users, and access keys. Accept the self-signed certificate warning.
+
+## Data Explorer (dynamodb-admin)
+
+GUI for browsing tables and items at: `http://localhost:8001`
+
+No login required — uses the same credentials as the app container. Create, edit, delete items and run queries visually.
 
 ## How Credentials Work
 
