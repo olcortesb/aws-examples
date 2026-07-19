@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda Self-Managed Code Storage - REFERENCE vs COPY demo
+
+Parameters:
+  CodeBucket:
+    Type: String
+  CodeS3Key:
+    Type: String
+    Default: deployments/app.zip
+  CodeS3Version:
+    Type: String
+    Description: S3 object version ID (required for REFERENCE mode)
+
+Resources:
+
+  # ===========================
+  # IAM Role
+  # ===========================
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # ===========================
+  # Lambda - REFERENCE mode
+  # ===========================
+  ReferenceFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-reference"
+      Role: !GetAtt LambdaRole.Arn
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref CodeBucket
+        S3Key: !Ref CodeS3Key
+        S3ObjectVersion: !Ref CodeS3Version
+        S3ObjectStorageMode: REFERENCE
+      Environment:
+        Variables:
+          CODE_BUCKET: !Ref CodeBucket
+          STORAGE_MODE: REFERENCE
+
+  # ===========================
+  # Lambda - COPY mode
+  # ===========================
+  CopyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-copy"
+      Role: !GetAtt LambdaRole.Arn
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref CodeBucket
+        S3Key: !Ref CodeS3Key
+        S3ObjectVersion: !Ref CodeS3Version
+        S3ObjectStorageMode: COPY
+      Environment:
+        Variables:
+          CODE_BUCKET: !Ref CodeBucket
+          STORAGE_MODE: COPY
+
+Outputs:
+  ReferenceFunctionName:
+    Value: !Ref ReferenceFunction
+  CopyFunctionName:
+    Value: !Ref CopyFunction
