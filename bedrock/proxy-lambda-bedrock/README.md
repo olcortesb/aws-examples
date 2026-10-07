@@ -1,4 +1,4 @@
-# bedrock-pr-review
+# bedrock Access Proxy
 
 SAM infrastructure for PR review via Bedrock Claude, exposed through an API Gateway authenticated with Cognito.
 

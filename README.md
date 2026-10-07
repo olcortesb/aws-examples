@@ -6,6 +6,8 @@ A repository of practical AWS services examples and use cases. Hands-on learning
 
 ```
 aws-examples/
+├── bedrock/
+│   └── proxy-lambda-bedrock/   # Bedrock access proxy with Cognito + API GW + Lambda (SAM)
 ├── dynamodb/
 │   └── extenddb-local/         # DynamoDB-compatible local env with ExtendDB (Docker)
 ├── sqs/
@@ -16,6 +18,15 @@ aws-examples/
 ```
 
 ## Examples
+
+### Bedrock - Proxy Lambda Bedrock
+Secure proxy architecture to expose Amazon Bedrock Claude models via API Gateway authenticated with Cognito. Includes a Usage Plan for rate limiting and a Lambda with minimal IAM permissions.
+- Cognito User Pool with USER_PASSWORD_AUTH and 1h token caching
+- API Gateway with Cognito Authorizer + Usage Plan (2 req/s, 200 req/month)
+- Lambda handler with minimal permissions (`bedrock:InvokeModel` only)
+- Supports Claude inference profiles (`us.*` prefix)
+- SAM infrastructure as code
+- [Read more](bedrock/proxy-lambda-bedrock/README.md)
 
 ### DynamoDB - ExtendDB Local
 Full DynamoDB-compatible local environment using [ExtendDB](https://github.com/ExtendDB/extenddb) (open source). Three Docker containers: PostgreSQL, ExtendDB server, and a Python app with selectable test scripts.
