@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: PR Review via Bedrock Claude - POC
+
+Globals:
+  Function:
+    Timeout: 25
+    MemorySize: 256
+    Runtime: python3.12
+    Environment:
+      Variables:
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: anthropic.claude-haiku-4-5-20251001-v1:0
+
+Resources:
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: pr-review-user-pool
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: pr-review-client
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+
+  PRReviewApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: pr-review-api
+      StageName: prod
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt UserPool.Arn
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Throttle:
+            RateLimit: 2
+            BurstLimit: 5
+          Quota:
+            Limit: 200
+            Period: MONTH
+
+  BedrockLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/bedrock/model-invocations
+      RetentionInDays: 30
+
+  PRReviewFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: pr-review-bedrock
+      Handler: handler.lambda_handler
+      CodeUri: src/
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource: "*"
+      Events:
+        ReviewApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PRReviewApi
+            Path: /review
+            Method: POST
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${PRReviewApi}.execute-api.${AWS::Region}.amazonaws.com/prod/review"
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient

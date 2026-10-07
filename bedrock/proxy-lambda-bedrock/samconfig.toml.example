@@ -1,0 +1,14 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "pr-review-bedrock"
+resolve_s3 = true
+s3_prefix = "pr-review-bedrock"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "BedrockModelId=\"anthropic.claude-3-5-haiku-20241022-v1:0\""
+image_repositories = []
+
+[default.global.parameters]
+region = "us-east-1"
